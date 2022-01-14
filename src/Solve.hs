@@ -23,7 +23,7 @@ smallGrid = [
 
 -- pipeline
 solve :: Grid [Mark] -> Grid Mark
-solve grid = checkGrids $ search $ prune $ fill grid
+solve grid = checkGrids $ search $ fill grid
 
 
 -- main pipeline functions

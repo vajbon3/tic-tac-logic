@@ -27,21 +27,22 @@ passed :: Grid Mark -> Bool
 passed grid = pass grid && pass (transpose grid)
 
 pass :: Grid Mark -> Bool
-pass grid = twoPairs grid && equalMarks grid && unique grid
+pass grid = noTriple grid && twoPairs grid X && twoPairs grid O && equalMarks grid && unique grid
 
 
 -- validity conditions
 
--- max two consecutive marks per row and column
-twoPairs :: Grid Mark -> Bool
-twoPairs = foldr (\ row -> (&&) (pairCounter row 0 2)) True
+-- max two consecutive X or Os per row and column
+twoPairs :: Grid Mark -> Mark -> Bool
+twoPairs (row:rows) mark = pairCounter row 0 2 mark
+twoPairs [] mark = True 
 
-pairCounter :: Row Mark -> Int -> Int -> Bool
-pairCounter _ curr max | curr > max = False
-    | otherwise = True
-pairCounter [] curr max = True
-pairCounter (x:y:xs) curr max | x == y = pairCounter xs (curr+1) max
-    | otherwise = pairCounter (y:xs) curr max
+pairCounter :: Row Mark -> Int -> Int -> Mark -> Bool
+pairCounter _ curr max mark | curr > max = False
+pairCounter (x:y:xs) curr max mark | x == y && y == mark = pairCounter (y:xs) (curr+1) max mark
+    | otherwise = pairCounter (y:xs) curr max mark
+pairCounter [_] curr max mark = True
+pairCounter [] curr max mark = True
 
 
 -- equal amount of x and o's per row and column
@@ -57,6 +58,17 @@ equalMarksRow row = do
 unique :: Grid Mark -> Bool
 unique grid = length grid == length (nub grid)
 
+
+-- only two at a time
+noTriple :: Grid Mark -> Bool
+noTriple = foldr ((&&) . noTripleRow) True
+
+noTripleRow :: Row Mark -> Bool
+noTripleRow [] = True
+noTripleRow (a:b:c:xs) | a == b && b == c = False
+    | otherwise = noTripleRow (b:c:xs)
+noTripleRow [_] = True
+noTripleRow [_,_] = True
 
 -- result grid checking helper functions - analogous to ones in Lib.hs but
 -- these ones take Grid Mark instead of Grid [Mark]
