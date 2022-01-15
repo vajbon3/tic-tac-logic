@@ -31,12 +31,36 @@ counter (x,o,choice) (y:ys) | y == [X] = counter (x+1,o,choice) ys
 
 
 -- mark unmarked spots in the row with the provided mark, 
--- if it is a valid choice at that spot
-setRow :: Mark -> Row [Mark] -> Row [Mark]
-setRow mark (x:xs) | not (single x) = [mark]:setRow mark xs
+setRow :: [Mark] -> Row [Mark] -> Row [Mark]
+setRow mark (x:xs) | not (single x) = mark:setRow mark xs
     | otherwise = x:setRow mark xs
 setRow mark [] = []
+
+-- set first umarked spot in a row with provided mark 
+-- if it is a valid choice at that spot and if it will not create triplets
+setFirst :: Mark -> Grid [Mark] -> Row [Mark] -> Row [Mark]
+setFirst mark grid (x:xs) | not (single x) && elem mark x && noTriple grid  = [mark]:xs
+    | otherwise = x:setFirst mark grid xs
+setFirst mark grid [] = []
 
 -- check if any box in grid has no choices left (invalidates the whole solution grid)
 void :: Grid [Mark] -> Bool
 void = any (elem [])
+
+-- check for triplets
+-- only two at a time
+noTriple :: Grid [Mark] -> Bool
+noTriple = foldr ((&&) . noTripleRow) True
+
+noTripleRow :: Row [Mark] -> Bool
+noTripleRow [] = True
+noTripleRow (a:b:c:xs) | a == b && b == c = False
+    | otherwise = noTripleRow (b:c:xs)
+noTripleRow [_] = True
+noTripleRow [_,_] = True
+
+
+replaceAt :: Int -> a -> [a] -> [a]
+replaceAt idx element array =
+    firstHalf ++ element : drop 1 secondHalf
+    where (firstHalf, secondHalf) = splitAt idx array

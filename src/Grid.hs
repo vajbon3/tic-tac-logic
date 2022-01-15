@@ -20,10 +20,10 @@ marked :: Mark -> Bool
 marked Empty = False
 marked _ = True
 
-opposite :: Mark -> Mark
-opposite X = O
-opposite O = X
-opposite Empty = Empty
+opposite :: [Mark] -> [Mark]
+opposite [X] = [O]
+opposite [O] = [X]
+opposite _ = [X,O]
 
 single :: [Mark] -> Bool
 single mark = length mark == 1

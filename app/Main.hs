@@ -1,7 +1,6 @@
 module Main where
 import Grid
 import Solve(solve)
-
 main = do
     input <- getContents
     let solution = solve (parse input)

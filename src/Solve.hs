@@ -1,5 +1,5 @@
 module Solve where
- 
+
 import Grid
 import Data.List
 import Lib
@@ -23,7 +23,7 @@ smallGrid = [
 
 -- pipeline
 solve :: Grid [Mark] -> Grid Mark
-solve grid = checkGrids $ search $ fill grid
+solve grid = checkGrids $ search $ fix $ fill grid
 
 
 -- main pipeline functions
@@ -45,7 +45,7 @@ prune grid = setTechniques techniques (transpose (setTechniques techniques (tran
      where
          techniques = [
                     avoidingTriples,
-                    --avoidingTriples3,
+                    avoidingTriples3,
                     complete
                     ]
 
@@ -95,15 +95,24 @@ avoidingTriplesRow [] = []
 
 -- technique 3
 avoidingTriples3 :: Grid [Mark] -> Grid [Mark]
-avoidingTriples3 = map avoidingTriples3Row
+avoidingTriples3 (row:rows) = avoidingTriples3Helper (Lib.counter (0,0,0) row) row : avoidingTriples3 rows
+avoidingTriples3 [] = []
 
-avoidingTriples3Row :: Row [Mark] -> Row [Mark]
-avoidingTriples3Row row = do
-    let (x,o,choices) = Lib.counter (0,0,0) row
-        majority = div (length row) 2
-        in if x + 1 == majority  then setRow X row
-        else if o + 1 == majority then setRow O row
-        else row
+avoidingTriples3Helper :: (Int,Int,Int) -> Row [Mark] -> Row [Mark]
+avoidingTriples3Helper (x,o,choices) row | x + 1 == half = replaceMaster indices [X] row
+    | o + 1 == half = replaceMaster indices [O] row
+    | otherwise = row
+    where half = length row `div` 2; indices = elemIndices [X,O] row;
+
+replaceMaster :: [Int] -> [Mark] -> Row [Mark] -> Row [Mark]
+replaceMaster [] _ row = row
+replaceMaster (idx:idxs) mark row | not (Lib.noTripleRow placeOpposite) = replaceAt idx (opposite mark) row
+    | otherwise = replaceMaster idxs mark row
+    where
+        replacedRow = replaceAt idx mark row
+
+        placeOpposite :: Row [Mark]
+        placeOpposite = setRow (opposite mark) replacedRow
 
 
 -- technique 4
@@ -114,7 +123,7 @@ completeRow :: Row [Mark] -> Row [Mark]
 completeRow row = do
     let (x,o,choices) = Lib.counter (0,0,0) row
         majority = div (length row) 2
-        in if x == majority then setRow O row
-        else if o == majority then setRow X row
-        else row 
+        in if x == majority then setRow [O] row
+        else if o == majority then setRow [X] row
+        else row
 
