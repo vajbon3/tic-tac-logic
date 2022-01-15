@@ -56,7 +56,9 @@ fix grid =
     let grid' = prune grid
      in if grid == grid' then grid else prune grid'
 
--- brute force using cartesian product
+
+-- brute force using cartesian product ( only used to turn Grid [Mark] into Grid Mark )
+-- not used as a brute force method anymore, too slow
 collapse :: Grid [Mark] -> [Grid Mark]
 collapse = cp
 
@@ -93,20 +95,23 @@ avoidingTriplesRow ([X]:arr:[X]:xs) = [X]:delete X arr:avoidingTriplesRow ([X]:x
 avoidingTriplesRow (x:xs) = x:avoidingTriplesRow xs
 avoidingTriplesRow [] = []
 
+
 -- technique 3
 avoidingTriples3 :: Grid [Mark] -> Grid [Mark]
-avoidingTriples3 (row:rows) = avoidingTriples3Helper (Lib.counter (0,0,0) row) row : avoidingTriples3 rows
+avoidingTriples3 (row:rows) = avoidingTriples3Row (Lib.counter (0,0,0) row) row : avoidingTriples3 rows
 avoidingTriples3 [] = []
 
-avoidingTriples3Helper :: (Int,Int,Int) -> Row [Mark] -> Row [Mark]
-avoidingTriples3Helper (x,o,choices) row | x + 1 == half = replaceMaster indices [X] row
+avoidingTriples3Row :: (Int,Int,Int) -> Row [Mark] -> Row [Mark]
+avoidingTriples3Row (x,o,choices) row 
+    | x + 1 == half = replaceMaster indices [X] row
     | o + 1 == half = replaceMaster indices [O] row
     | otherwise = row
     where half = length row `div` 2; indices = elemIndices [X,O] row;
 
 replaceMaster :: [Int] -> [Mark] -> Row [Mark] -> Row [Mark]
 replaceMaster [] _ row = row
-replaceMaster (idx:idxs) mark row | not (Lib.noTripleRow placeOpposite) = replaceAt idx (opposite mark) row
+replaceMaster (idx:idxs) mark row 
+    | not (Lib.noTripleRow placeOpposite) = replaceAt idx (opposite mark) row
     | otherwise = replaceMaster idxs mark row
     where
         replacedRow = replaceAt idx mark row

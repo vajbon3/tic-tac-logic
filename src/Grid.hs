@@ -8,8 +8,7 @@ instance Show Mark where
     show Empty = "."
 
 
-type Grid a = Matrix a
-type Matrix a = [Row a]
+type Grid a = [Row a]
 type Row a = [a]  
 
 size :: Grid a -> (Int, Int)

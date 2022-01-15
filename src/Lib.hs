@@ -4,12 +4,7 @@ import Grid
 
 -- helper functions
 
--- cartesian product (calculate all possible grids for brute force )
-cp :: Grid [Mark] -> [Grid Mark]
-cp [] = [[]]
-cp (row:rows) = [y:ys | y <- cpRow row, ys <- cp rows]
-
--- explode first choice list 
+-- explode first choice list (way faster than cartesian product brute force) 
 expand :: Grid [Mark] -> [Grid [Mark]]
 expand grid =
     [rows1 ++ [row1 ++ [c] : row2] ++ rows2 | c <- cs]
@@ -17,6 +12,11 @@ expand grid =
        (rows1,row:rows2) = break (any (not . single)) grid
        (row1,cs:row2)    = break (not . single) row
 
+
+-- cartesian product (calculate all possible grids for brute force )
+cp :: Grid [Mark] -> [Grid Mark]
+cp [] = [[]]
+cp (row:rows) = [y:ys | y <- cpRow row, ys <- cp rows]
 
 cpRow :: Row [Mark] -> [Row Mark]
 cpRow row@(x:xs) = [y:ys | y <- x, ys <- cpRow xs]
@@ -60,7 +60,6 @@ noTripleRow [_] = True
 noTripleRow [_,_] = True
 
 
-replaceAt :: Int -> a -> [a] -> [a]
-replaceAt idx element array =
-    firstHalf ++ element : drop 1 secondHalf
-    where (firstHalf, secondHalf) = splitAt idx array
+replaceAt :: Int -> [Mark] -> Row [Mark] -> Row [Mark]
+replaceAt idx mark row = first ++ mark : drop 1 second
+    where (first, second) = splitAt idx row
