@@ -28,6 +28,7 @@ library
       Check
       Grid
       Lib
+      Matrices
       Solve
   other-modules:
       Paths_Tic_Tac_Logic
@@ -35,6 +36,8 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , criterion
+    , hspec
   default-language: Haskell2010
 
 executable Tic-Tac-Logic-exe
@@ -47,6 +50,8 @@ executable Tic-Tac-Logic-exe
   build-depends:
       Tic-Tac-Logic
     , base >=4.7 && <5
+    , criterion
+    , hspec
   default-language: Haskell2010
 
 test-suite Tic-Tac-Logic-test
@@ -60,4 +65,21 @@ test-suite Tic-Tac-Logic-test
   build-depends:
       Tic-Tac-Logic
     , base >=4.7 && <5
+    , criterion
+    , hspec
+  default-language: Haskell2010
+
+benchmark Tic-Tac-Logic-bench
+  type: exitcode-stdio-1.0
+  main-is: Benchmarks.hs
+  other-modules:
+      Paths_Tic_Tac_Logic
+  hs-source-dirs:
+      benchmark
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Tic-Tac-Logic
+    , base >=4.7 && <5
+    , criterion
+    , hspec
   default-language: Haskell2010
