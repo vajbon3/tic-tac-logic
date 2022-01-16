@@ -46,7 +46,8 @@ prune grid = setTechniques techniques (transpose (setTechniques techniques (tran
          techniques = [
                     avoidingTriples,
                     avoidingTriples3,
-                    complete
+                    complete,
+                    duplicateAnnihilator
                     ]
 
 
@@ -131,4 +132,54 @@ completeRow row = do
         in if x == majority then setRow [O] row
         else if o == majority then setRow [X] row
         else row
+
+
+-- technique 5
+similarRow :: Row [Mark] -> Row [Mark] -> Bool
+similarRow [] [] = True
+similarRow (x:xs) (x':xs') 
+    | x == [X,O] = similarRow xs xs'
+    | otherwise = x == x' && similarRow xs xs'
+similarRow _ _ = False
+
+findSimilar :: Grid [Mark] -> Row [Mark] -> Row [Mark]
+findSimilar (row:rows) rowToFind
+    | similarRow rowToFind row = row
+    | otherwise = findSimilar rows rowToFind
+findSimilar [] _ = []
+
+
+fillSimilarRow :: Row [Mark] -> Row [Mark] -> Row [Mark]
+fillSimilarRow (x:xs) (x':xs')
+    | x == [X,O] = opposite x' : fillSimilarRow xs xs'
+    | otherwise = x : fillSimilarRow xs xs'
+fillSimilarRow _ _ = []
+
+
+duplicateAnnihilator :: Grid [Mark] -> Grid [Mark]
+duplicateAnnihilator (row:rows) = duplicateAnnihilatorRow row : duplicateAnnihilator rows
+duplicateAnnihilator [] = []
+
+duplicateAnnihilatorRow :: Row [Mark] -> Row [Mark]
+duplicateAnnihilatorRow row 
+    | similarRow /= [] = fillSimilarRow row similarRow
+    | otherwise = row
+    where
+        completedRows = findComplete grid
+        similarRow = findSimilar completedRows row
+
+
+findComplete :: Grid [Mark] -> Grid [Mark]
+findComplete (row:rows) = findCompleteRow row : findComplete rows
+findComplete [] = []
+
+findCompleteRow :: Row [Mark] -> Row [Mark]
+findCompleteRow row 
+    | choices == 0 = row
+    | otherwise = []
+    where
+        (x,o,choices) = Lib.counter (0,0,0) row
+
+
+
 
